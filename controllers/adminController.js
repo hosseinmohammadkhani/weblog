@@ -314,59 +314,5 @@ module.exports.editProfilePage = (req , res) => {
     })
 }
 
-// module.exports.handleEditPost = async(req , res) => {
-//     const errors = []
-//     let thumbnail = req.files ? req.files.thumbnail : {}
-//     let fileName = `${await nanoid()}_${thumbnail.name}`
-//     fileName = fileName.replace(/\s+/g, '-').toLowerCase() //replacing space with dash
-//     const uploadPath = `${appRoot}/public/uploads/thumbnails/${fileName}`
-    
-//     //finds post by id 
-//     const post = await Post.findOne({ _id : req.params.id })
-//     try {       
-//   
-//         if(!post) return res.redirect("/404")
-
-//         //post.user and req.user are populated by passport
-//         if(post.user.toString() != req.user._id) return res.redirect("/dashboard")
-//         else{
-//             if(thumbnail.name){
-                
-//                 //Delete previous thumbnail 
-//                 //Add new thumbnail
-//                 fs.unlink(`${appRoot}/public/uploads/thumbnails/${post.thumbnail}` , async err => {
-//                     if(err) console.log(err);
-//                     else await sharp(thumbnail.data).toFile(uploadPath , err => console.log(err)) 
-//                 })
-
-//             }
-//             const { title , body , status } = req.body
-//             post.title = title
-//             post.body = body
-//             post.status = status 
-
-//             //If there's a new thumbnail(user wants to change thumbnail) name of the new thumbnail will be replaced
-//             //else name of the previous thumbnail will be saved 
-//             post.thumbnail = thumbnail.name ? fileName : post.thumbnail
-
-//             await post.save()
-//             return res.redirect("/dashboard")
-//         }
-
-//     } catch (err) {
-//         if(typeof err.errors["title"] != `undefined`) errors.push({ message : err.errors["title"].message })
-//         if(typeof err.errors["body"] != `undefined`) errors.push({ message : err.errors["body"].message })
-//         console.log("ERROR -> " , err);
-//         return res.render("./private/editPost.ejs" , {
-//             pageTitle : "ویرایش پست",
-//             path : "/dashboard/edit-post",
-//             layout : "./layouts/dashLayout.ejs",
-//        
-//             post : post,
-//             errors : errors  
-//         })
-//     }
-// }
-
 
 
