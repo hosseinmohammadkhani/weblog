@@ -1,0 +1,28 @@
+<% if(messages.length > 0){ %>
+    <table class="table">
+        <thead>
+            <tr>
+            <th scope="col">نام و نام خانوادگی</th>
+            <th scope="col">ایمیل</th>
+            <th scope="col">متن پیام</th>
+            <th scope="col">تاریخ ارسال</th>
+            <th scope="col">حذف</th>
+            </tr>
+        </thead>
+    <% messages.forEach(message => { %>
+        <tbody>
+            <tr>
+            <!--<th scope="row">1</th>-->
+            <td><%= message.fullName %></td>
+            <td><%= message.email %></td>
+            <td><%= truncate(message.message) %></td>
+            <td><%= convertToShamsi(message.createdAt) %></td>
+            <td>
+                <a href="/dashboard/delete-message/<%= message._id %>" class="btn btn-danger">حذف</a>
+            </td>
+            </tr>
+        </tbody>
+    <% }) %>
+<% }else{ %>
+    <p>پیامی برای شما وجود ندارد</p>
+<% } %>

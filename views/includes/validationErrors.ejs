@@ -1,0 +1,5 @@
+<% if(typeof errors != `undefined`){ %>
+    <% errors.forEach(e => { %>
+        <div class="alert alert-danger" role="alert"><%= e.message %></div>
+    <% }) %>
+<% } %>

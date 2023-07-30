@@ -1,0 +1,42 @@
+<!-- Page Content -->
+<div class="container mt-5">
+    <div class="row">
+        <!-- Post Content Column -->
+        <div class="col">
+            <!-- Title -->
+            <h1 class="mt-4"><%= post.title %></h1>
+
+            <!-- Author -->
+            <p class="lead">
+                نوشته شده توسط :
+                <a href="/users/profile/<%= username %>"><%= username %></a>
+            </p>
+
+            <hr />
+
+            <!-- Date/Time -->
+            <p>تاریخ انتشار : <%= convertToShamsi(post.createdAt) %></p>
+
+            <hr />
+
+            <!-- Preview Image -->
+            <div class="text-center">
+                <img
+                    src="http://localhost:5000/uploads/thumbnails/<%= post.thumbnail %>"
+                    class="img-fluid rounded"
+                    alt=""
+                />
+            </div>
+
+            <hr />
+
+            <!-- Post Content -->
+            <p class="text-justify"><%- post.body %></p>
+
+            <hr />
+            <!-- Comment with nested comments -->
+            
+            </div>
+        </div>
+    </div>
+</div>

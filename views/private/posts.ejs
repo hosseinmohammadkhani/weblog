@@ -1,0 +1,34 @@
+<% if(posts.length > 0){ %>
+    <table class="table">
+    <thead>
+        <tr>
+        <th scope="col">موضوع</th>
+        <th scope="col">ایمیل</th>
+        <th scope="col">تاریخ انتشار</th>
+        <th scope="col">وضعیت</th>
+        <th scope="col">حذف/ویرایش</th>
+        </tr>
+    </thead>
+    <% posts.forEach(post => { %>
+        <tbody>
+            <tr>
+            <!--<th scope="row">1</th>-->
+            <td><%= post.title %></td>
+            <td><%= email %></td>
+            <td><%= convertToShamsi(post.createdAt) %></td>
+            <td>
+                <span class="badge <%= post.status === "public" ? "badge-success" : "badge-warning" %>"><%= post.status === "public" ? "عمومی" : "خصوصی" %></span>
+            </td>
+            <td>
+                <a href="/dashboard/delete-post/<%= post._id %>" class="btn btn-danger">حذف</a>
+                <a href="/dashboard/edit-post/<%= post._id %>" class="btn btn-warning">ویرایش</a>
+            </td>
+            </tr>
+        </tbody>
+        
+    <% }) %>
+    </table>
+    <%- include("../includes/pagination.ejs") %>
+<% }else if(posts.length == 0){ %>
+    <p>هنوز پستی ایجاد نکرده‌اید</p>
+<% } %>

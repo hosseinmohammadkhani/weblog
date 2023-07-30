@@ -1,0 +1,33 @@
+    <html>
+    <body>
+<% if(posts.length > 0){ %>
+    <% posts.forEach(post => { %>
+        <div class="container">
+            <div class="post">
+                <div class="post-image" >
+                    <img src="http://localhost:5000/uploads/thumbnails/<%= post.thumbnail %>" alt="Post Image" class="img-fluid">
+                </div>
+                <h2 class="post-title"><%= post.title %></h2>
+                <div class="post-meta">
+                <span class="post-date"><%= convertToShamsi(post.createdAt) %></span>
+                <span class="post-author"></span>
+                </div>
+
+                <div class="post-content">
+                    <p><%- truncate(post.body , 200) %></p>
+                    <a href="/post/<%= post._id %>" class="see-more">See More...</a>
+                </div>
+            </div>
+        </div>
+        
+        </body>
+            <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+            <script src="script.js"></script>
+            
+    </html>
+            
+    <% }) %>
+    <%- include("./includes/pagination.ejs") %>
+<% }else{ %>
+    <p>هیچ پستی در پایگاه داده نیست</p>
+<% } %>

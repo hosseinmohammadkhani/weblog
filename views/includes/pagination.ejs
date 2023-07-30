@@ -1,0 +1,38 @@
+<% if(path === "/dashboard"){ %>
+    <nav>
+        <ul class="pagination justify-content-center">
+            <% if(page !== 1 && page !== 2){ %>
+                <li class="page-item"><a href="/dashboard?page=1"> 1 </a></li>
+            <% } %>    
+            <% if(hasNextPage){ %>
+                <li class="page-item"><a href="/dashboard?page=<%= page + 1 %>"> <%= page + 1 %> </a></li>
+            <% } %>
+            <% if(hasPreviousPage){ %>
+                <li class="page-item"><a href="/dashboard?page=<%= page - 1 %>"> <%= page - 1 %> </a></li>
+            <% } %>
+            <% if(page !== lastPage && page + 1 !== lastPage){ %>
+                <li class="page-item"><a href="/dashboard?page=<%= lastPage %>"> <%= lastPage %> </a></li>
+            <% } %>
+
+        </ul>
+    </nav>
+<% }else{ %>
+    <nav>
+        <ul class="pagination justify-content-center">
+            <% if(page !== 1 && page !== 2){ %>
+                <li class="page-item"><a href="?page=1"> 1 </a></li>
+            <% } %>    
+            <% if(hasNextPage){ %>
+                <li class="page-item"><a href="?page=<%= page + 1 %>"> <%= page + 1 %> </a></li>
+            <% } %>
+            <% if(hasPreviousPage){ %>
+                <li class="page-item"><a href="?page=<%= page - 1 %>"> <%= page - 1 %> </a></li>
+            <% } %>
+            <% if(page !== lastPage && page + 1 !== lastPage){ %>
+                <li class="page-item"><a href="?page=<%= lastPage %>"> <%= lastPage %> </a></li>
+            <% } %>
+
+        </ul>
+    </nav>
+<% } %>
+

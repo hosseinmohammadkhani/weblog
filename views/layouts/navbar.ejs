@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="/css/homeCss.css">
+  <title><%= pageTitle %></title>
+</head>
+<body class="rtl">
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light rtl">
+    
+    <button class="navbar-toggler rtl" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse rtl" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto rtl">
+        <li class="nav-item rtl">
+          <a style="text-align: right;" class="rtl nav-link <%= path === "/" ? "active"  : "" %>" href="/">صفحه اصلی</a>
+        </li>
+        <li class="nav-item rtl">
+          <a style="text-align: right;" class="nav-link" href="#">درباره ما</a>
+        </li>
+        <% if(req.isAuthenticated()){ %>
+          <li class="nav-item">
+            <a style="text-align: right;" class="nav-link" href="/dashboard">داشبورد</a>
+          </li>
+        <% }else{ %>
+          <li class="nav-item">
+            <a style="text-align: right;" class="nav-link" href="/users/login">ورود</a>
+          </li>
+          <li class="nav-item">
+            <a style="text-align: right;" class="nav-link" href="/users/register">ثبت نام</a>
+          </li>
+        <% } %>
+        <li class="nav-item">
+          <a style="text-align: right;" class="nav-link" href="/contact-us">ارتباط با ما</a>
+        </li>
+      </ul>
+      <% if(path !== "/contact-us"){ %>
+        <form class="form-inline my-2 my-lg-0" action="/search" method="POST">
+          <input class="form-control mr-sm-2" name="search" type="search" placeholder="جستجو میان پست ها" aria-label="Search">
+          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">جستجو</button>
+        </form>
+      <% } %>
+    </div>
+  </nav>
+
+  <%- body %>
+
+  <script src="/js/homejs.js"></script>
+
+</body>
+</html>
