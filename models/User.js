@@ -27,7 +27,6 @@ const userSchema  = new mongoose.Schema({
 
 })
 
-//pre middleware functions are executed one after another
 //Password will be encrypted before saving
 userSchema.pre("save" , function(next){
     let user = this

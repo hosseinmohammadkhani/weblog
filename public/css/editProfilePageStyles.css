@@ -1,0 +1,27 @@
+body {
+    padding-top: 20px;
+  }
+  
+  .card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-header {
+    border-bottom: none;
+  }
+  
+  .btn-primary {
+    background-color: #4CAF50;
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    background-color: #45a049;
+  }
+  
+  .form-control:focus {
+    box-shadow: none;
+  }
+  
+  /* Add more custom styles as needed */
+  

@@ -41,6 +41,11 @@
         <li class="nav-item">
           <a style="text-align: right;" class="nav-link" href="/contact-us">ارتباط با ما</a>
         </li>
+        <% if(req.isAuthenticated()){ %>
+          <li class="nav-item">
+            <a style="text-align: right;" class="nav-link" href="/users/logout">خروج</a>
+          </li>
+        <% } %>
       </ul>
       <% if(path !== "/contact-us"){ %>
         <form class="form-inline my-2 my-lg-0" action="/search" method="POST">

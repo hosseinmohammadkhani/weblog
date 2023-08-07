@@ -7,6 +7,7 @@ const appRoot = require('app-root-path');
 const { nanoid } = require('nanoid');
 const { convertToShamsi } = require('../utils/helpers.js');
 const { truncate } = require('../utils/helpers.js');
+const { render } = require('ejs');
 
 module.exports.getDashboard = async(req , res) => {
 
@@ -16,7 +17,6 @@ module.exports.getDashboard = async(req , res) => {
         "no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0"
     );
 
-    //تبدیل استرینگ به نامبر با یک حرکت
     const page = +req.query.page || 1
     const postPerPage = 3
 
@@ -28,7 +28,7 @@ module.exports.getDashboard = async(req , res) => {
     .skip((page - 1) * postPerPage)
     .limit(postPerPage)
     
-    const user = await User.findOne({ user : req.params.id })
+    const user = await User.findOne({ _id : req.user._id })
     res.render("./private/posts.ejs" , {
         pageTitle : "داشبورد",
         path : "/dashboard",
@@ -277,7 +277,7 @@ module.exports.messagesPage = async(req , res) => {
 
     res.render("./private/messages.ejs" , {
         pageTitle : " پیام ها",
-        path : "/dashboard/messages/:username",
+        path : `/dashboard/messages/${user.username}`,
         layout : "./layouts/dashLayout.ejs",
         username : user.username,
         messages : messages,
@@ -308,11 +308,106 @@ module.exports.deleteMessage = async(req , res) => {
     } 
 }
 
-module.exports.editProfilePage = (req , res) => {
+function renderEditProfilePage(req , res , user){
     res.render("./private/editProfile.ejs" , {
-        pageTitle : "ویرایش مشخصات"
+        pageTitle : "ویرایش مشخصات",
+        path : `/dashboard/edit-profile/${user.username}`,
+        layout : "./layouts/dashLayout.ejs",
+        username : user.username,
+        error : req.flash("error"),
+        message : req.flash("success_msg"),
+        email : user.email,
+        password : user.password
     })
 }
 
+module.exports.editProfilePage = async(req , res) => {
+    try {
+        //finds user by id
+        const user = await User.findOne({ _id : req.user._id })
+        
+        if(!user) return res.redirect("/404")
+
+        console.log("Edit profile User : " , user);
+        
+        res.render("./private/editProfile.ejs" , {
+            pageTitle : "ویرایش مشخصات",
+            path : `/dashboard/edit-profile/${user.username}`,
+            layout : "./layouts/dashLayout.ejs",
+            username : user.username,
+            error : req.flash("error"),
+            message : req.flash("success_msg"),
+            email : user.email,
+            password : user.password
+        })   
+
+    }catch (error) {
+        console.log(error);
+        return res.redirect("/500")
+    }
+}
+
+module.exports.handleEditProfile = async(req , res) => {
+    const { username , email } = req.body
+    try {
+        const user = await User.findOne({ _id : req.user._id })
+        if(user.email === email){
+            if(user.username === username){
+                req.flash("success_msg" , "پروفایل با موفقیت تغییر یافت")
+                user.username = username
+                user.email = email
+                await user.save()
+                return renderEditProfilePage(req , res , user)
+                       
+            }else if(user.username !== username){
+                const duplicatedUsername  = await User.findOne({ username })
+                if(duplicatedUsername){
+                    req.flash("error" , "کاربر با این نام کاربری موجود است")
+                    return renderEditProfilePage(req , res , user)
+                }
+                if(username === "" || username.length < 6 || username.length > 255){
+                    req.flash("error" , "نام کاربری غیرمجاز")
+                    return renderEditProfilePage(req , res , user)
+                }
+                req.flash("success_msg" , "پروفایل با موفقیت تغییر یافت")
+                user.username = username
+                user.email = email
+                await user.save()
+                return renderEditProfilePage(req , res , user)
+                
+            }
+        }else{
+            const duplicatedEmail = await User.findOne({ email })
+            if(duplicatedEmail){
+                req.flash("error" , "کاربر با این ایمیل موجود است")
+                return renderEditProfilePage(req , res , user)
+            }
+            if(user.username === username){
+                req.flash("success_msg" , "پروفایل با موفقیت تغییر یافت")
+                user.email = email
+                user.username = username
+                await user.save()
+                return renderEditProfilePage(req , res , user)
+                
+            }else if(user.username !== username){
+            const duplicatedUsername  = await User.findOne({ username })
+            if(duplicatedUsername){
+                req.flash("error" , "کاربر با این نام کاربری موجود است")
+                return renderEditProfilePage(req , res , user)
+            }
+            if(username === "" || username.length < 6 || username.legnth > 255){
+                req.flash("error" , "نام کاربری غیرمجاز")
+                return renderEditProfilePage(req , res , user)
+            }
+                req.flash("success_msg" , "پروفایل با موفقیت تغییر یافت")
+                user.username = username
+                await user.save()
+                return renderEditProfilePage(req , res , user)
+            }
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 

@@ -40,7 +40,11 @@ router.get("/messages/:username" , isAuthenticated , adminController.messagesPag
 router.get("/delete-message/:id" , isAuthenticated , adminController.deleteMessage)
 
 // @desc edit profile page
-// @route GET /dashboard/edit-profile
-router.get("/edit-profile" , isAuthenticated , adminController.editProfilePage)
+// @route GET /dashboard/edit-profile/:username
+router.get("/edit-profile/:username" , isAuthenticated , adminController.editProfilePage)
+
+// @desc edit profile page
+// @route POST /dashboard/edit-profile/:username
+router.post("/edit-profile/:username" , isAuthenticated , adminController.handleEditProfile)
 
 module.exports = router
