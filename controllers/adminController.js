@@ -7,7 +7,8 @@ const appRoot = require('app-root-path');
 const { nanoid } = require('nanoid');
 const { convertToShamsi } = require('../utils/helpers.js');
 const { truncate } = require('../utils/helpers.js');
-const { render } = require('ejs');
+const jwt = require('jsonwebtoken');
+
 
 module.exports.getDashboard = async(req , res) => {
 
@@ -327,8 +328,6 @@ module.exports.editProfilePage = async(req , res) => {
         const user = await User.findOne({ _id : req.user._id })
         
         if(!user) return res.redirect("/404")
-
-        console.log("Edit profile User : " , user);
         
         res.render("./private/editProfile.ejs" , {
             pageTitle : "ویرایش مشخصات",
@@ -374,32 +373,55 @@ module.exports.handleEditProfile = async(req , res) => {
                 req.flash("error" , "کاربر با این ایمیل موجود است")
                 return renderEditProfilePage(req , res , user)
             }
-            if(user.username === username){
-                req.flash("success_msg" , "پروفایل با موفقیت تغییر یافت")
-                user.email = email
-                await user.save()
-                return renderEditProfilePage(req , res , user)
-                
-            }else if(user.username !== username){
-            const duplicatedUsername  = await User.findOne({ username })
-            if(duplicatedUsername){
-                req.flash("error" , "کاربر با این نام کاربری موجود است")
-                return renderEditProfilePage(req , res , user)
-            }
-            if(username === "" || username.length < 6 || username.legnth > 255){
-                req.flash("error" , "نام کاربری غیرمجاز")
-                return renderEditProfilePage(req , res , user)
-            }
-                req.flash("success_msg" , "پروفایل با موفقیت تغییر یافت")
-                user.email = email
-                user.username = username
-                await user.save()
-                return renderEditProfilePage(req , res , user)
-            }
+
+            const token = jwt.sign({ email : email , username : username } , process.env.JWT_SECRET , {expiresIn : "1h"})
+            const link = `http://localhost:5000/dashboard/change-email/${token}`
+            
+            req.flash("success_msg" , "لینک تایید به ایمیل شما ارسال شد")
+            console.log(link);
+            return renderEditProfilePage(req, res , user)
         }
     } catch (error) {
         console.log(error);
     }
 }
+module.exports.changeEmail = async(req , res) => {
+    const token = req.params.token
+    let decodedToken;
+    try {
+        decodedToken = jwt.verify(token , process.env.JWT_SECRET)
+        if(!decodedToken) return res.redirect("/404")
+    } catch (err) { console.log(err); }
 
+    try {
+        const user = await User.findOne({ _id : req.user._id })
+        if(decodedToken.username === user.username){
+            user.username = decodedToken.username
+            user.email = decodedToken.email
+            await user.save()
+            req.flash("success_msg" , "ایمیل با موفقیت تغییر کرد")
+            return res.redirect(`/dashboard/edit-profile/${user.username}`)
+        }else if(decodedToken.username !== user.username){
+            if(decodedToken.username === "" || decodedToken.username.length < 6 
+            || decodedToken.username.length > 255){
+                req.flash("error" , "نام کاربری غیرمجاز")
+                return renderEditProfilePage(req , res , user)
+            }
+            const duplicatedUsername = await User.findOne({ username : decodedToken.username })
+            if(duplicatedUsername){
+                req.flash("error" , "نام کاربری قبلا ثبت شده است")
+                return res.redirect(`/dashboard/edit-profile/${user.username}`)
+            }
+            user.username = decodedToken.username
+            user.email = decodedToken.email
+            await user.save()
+            req.flash("success_msg" , "ایمیل با موفقیت تغییر کرد")
+            return res.redirect(`/dashboard/edit-profile/${user.username}`)            
+        }
+
+    } catch (err) {
+        console.log(err);
+    }
+
+}
 

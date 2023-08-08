@@ -4,6 +4,7 @@ const { convertToShamsi } = require('../utils/helpers.js');
 const { truncate } = require('../utils/helpers.js');
 const captchapng = require('captchapng');
 const Message = require('../models/Message.js');
+const Comment = require('../models/Comment.js');
 let CAPTCHA_NUM
 
 module.exports.getPosts = async(req , res) => {
@@ -50,6 +51,9 @@ module.exports.showPost = async(req , res) => {
     //Finds user by id in the post
     const user = await User.findOne({ _id : post.user.toString() })
     
+    //All of the comments of the post in an array
+    const comments = await Comment.find({ postId : post._id })
+    
     if(!user) return res.redirect("/404")
 
     res.render("./private/post.ejs" , {
@@ -58,8 +62,11 @@ module.exports.showPost = async(req , res) => {
         post : post,
         layout : "./layouts/navbar.ejs",
         username : user.username,
+        message : req.flash("success_msg"),
+        error : req.flash("error"),
         convertToShamsi,      
-        req
+        req,
+        comments
     })
 
 }
@@ -174,4 +181,59 @@ module.exports.getCaptcha = (req , res) => {
     let img = p.getBase64()
     let imgbase64 = Buffer.from(img , "base64")
     res.send(imgbase64)
+}
+
+module.exports.submitComment = async(req , res) => {
+    const { name , comment } = req.body
+    try {
+        const post = await Post.findOne({ _id : req.params.postId })
+        const user = await User.findOne({ _id : post.user.toString() })
+        console.log(post)
+        //All of the comments of the post in a array
+        const comments = await Comment.find({ postId : post._id })
+
+        
+        if(!post) return res.redirect("/404")
+ 
+        if(name === "" || comment === ""){
+            req.flash("error" , "ارسال نام و نظر الزامی است")
+            return res.render("./private/post.ejs" , {
+                pageTitle : post.title,
+                path : "/post/:id",
+                post : post,
+                layout : "./layouts/navbar.ejs",
+                username : user.username,
+                message : req.flash("success_msg"),
+                error : req.flash("error"),
+                convertToShamsi,      
+                req,
+                comments
+            })
+        }
+        await Comment.create({ name , comment , postId : post._id })
+        return res.redirect(`/post/${post._id}`)
+    } catch (err) {
+        console.log(err);        
+    }    
+}
+
+module.exports.deleteComment = async(req , res) => {
+    try {
+        
+        //finds comment by its id     
+        const comment = await Comment.findOne({ _id : req.params.commentId })
+        
+        //finds post by id in the comment
+        const post = await Post.findOne({ _id : comment.postId.toString() })
+
+        if(req.user._id == post.user.toString()){
+            await Comment.findByIdAndRemove(req.params.commentId)
+            return res.redirect(`/post/${post._id}`)
+        }
+        else if(req.user._id != post.user.toString()) return res.redirect(`/post/${post._id}`)
+        
+        
+    } catch (err) {
+        console.log(err);
+    }
 }

@@ -47,4 +47,8 @@ router.get("/edit-profile/:username" , isAuthenticated , adminController.editPro
 // @route POST /dashboard/edit-profile/:username
 router.post("/edit-profile/:username" , isAuthenticated , adminController.handleEditProfile)
 
+// @desc edit email page
+// @route GET /dashboard/change-email/:token
+router.get("/change-email/:token" , isAuthenticated , adminController.changeEmail)
+
 module.exports = router

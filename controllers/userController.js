@@ -360,7 +360,6 @@ module.exports.handleResetPassword = async(req , res) => {
 }
 
 module.exports.showProfilePage = async(req , res) => {
-    console.log(req._parsedOriginalUrl.path);
     const username = req._parsedOriginalUrl.path.substr(15)
     
     //finds the first thing related - finds user by username

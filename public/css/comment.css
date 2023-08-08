@@ -1,0 +1,29 @@
+
+.comment-section {
+margin-top: 20px;
+direction : rtl;
+}
+
+.comment {
+border: 1px solid #ccc;
+padding: 10px;
+margin-bottom: 10px;
+direction : rtl;
+}
+
+.comment h5 {
+margin-bottom: 5px;
+direction : rtl;
+}
+
+/* Add custom styles for the form if needed */
+#comment-form {
+margin-top: 20px;
+direction : rtl;
+}
+
+#comment-form .form-group label {
+font-weight: bold;
+direction : rtl;
+}
+

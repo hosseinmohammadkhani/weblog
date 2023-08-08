@@ -23,7 +23,7 @@ const postSchema = new mongoose.Schema({
         enum : ["public" , "private"]
     },
     user : {
-        type : mongoose.Schema.Types.ObjectId, //puts id of user in the post,
+        type : mongoose.Schema.Types.ObjectId, //puts id of user in the post
         ref : "User"
     },
     createdAt : {
