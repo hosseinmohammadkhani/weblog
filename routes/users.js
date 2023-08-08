@@ -8,9 +8,17 @@ const { isAuthenticated } = require('../utils/helpers.js');
 // @route GET /users/register
 router.get("/register" , userController.registerPage)
 
-// @desc register handler
+// @desc send token to email
 // @route POST /users/register
-router.post("/register" , userController.createUser)
+router.post("/register" , userController.handleRegister)
+
+// @desc register page after verification
+// @route GET /users/register/:token
+router.get("/register/:token" , userController.getVerifiedRegisterPage)
+
+// @desc create user route
+// @route POST /users/register/:token
+router.post("/register/:token" , userController.createUser)
 
 // @desc login page
 // @route GET /users/login

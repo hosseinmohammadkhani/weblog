@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+
+    <link rel="stylesheet" href="/css/verifiedRegister.css" />
+  </head>
+  <body>
+    <form action="/users/register/<%= token %>" method="POST">
+      <div class="login_form_container">
+      <div class="login_form">
+        <h2>ثبت نام کاربر جدید</h2>
+        <%- include("./includes/validationErrors.ejs") %>
+        <div class="input_group">
+          <input
+            type="text"
+            name="username"
+            placeholder="نام کاربری"
+            class="input_text"
+            autocomplete="off"
+          />
+          <hr>
+          <input
+            type="email"
+            name="email"
+            class="input_text"
+            autocomplete="off"
+            value=<%= email %>
+          />
+          
+        </div>
+        <div class="input_group">
+          <input
+            type="password"
+            name="password"
+            placeholder="رمز عبور"
+            class="input_text"
+            autocomplete="off"
+          />
+          <hr>
+          <input
+            type="password"
+            name="confirmPassword"
+            placeholder="تکرار رمز عبور"
+            class="input_text"
+            autocomplete="off"
+          />
+        </div>
+        <div class="button_group" id="login_button">
+          <input type="submit" id="loginBtn" value="ثبت نام">
+        </div>
+      </div>
+    </div>
+    </form>
+    
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="/js/login.js"></script>
+  </body>
+</html>

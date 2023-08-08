@@ -9,50 +9,28 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     />
 
-    <link rel="stylesheet" href="/css/login.css" />
+    <link rel="stylesheet" href="/css/register.css" />
   </head>
   <body>
+    
     <form action="/users/register" method="POST">
       <div class="login_form_container">
       <div class="login_form">
-        <h2>ثبت نام کاربر جدید</h2>
-        <div class="input_group">
-          <input
-            type="text"
-            name="username"
-            placeholder="نام کاربری"
-            class="input_text"
-            autocomplete="off"
-          />
-          <hr>
-          <input
-            type="text"
-            name="email"
-            placeholder="ایمیل"
-            class="input_text"
-            autocomplete="off"
-          />
-          
-        </div>
-        <div class="input_group">
-          <input
-            type="password"
-            name="password"
-            placeholder="رمز عبور"
-            class="input_text"
-            autocomplete="off"
-          />
-          <hr>
-          <input
-            type="password"
-            name="confirmPassword"
-            placeholder="تکرار رمز عبور"
-            class="input_text"
-            autocomplete="off"
-          />
+            <h2>تایید ایمیل</h2>
+            <%- include("./includes/loginMessages.ejs") %>
+            <div class="input_group">
+            <input
+                type="email"
+                name="email"
+                placeholder="ایمیل"
+                class="input_text"
+                autocomplete="off"
+                required
+            />
+            </div>  
         </div>
         <div class="button_group" id="login_button">
-          <input type="submit" id="loginBtn" value="ثبت نام">
+          <input type="submit" id="loginBtn" value="ارسال لینک ثبت نام">
         </div>
       </div>
     </div>

@@ -352,14 +352,8 @@ module.exports.handleEditProfile = async(req , res) => {
     try {
         const user = await User.findOne({ _id : req.user._id })
         if(user.email === email){
-            if(user.username === username){
-                req.flash("success_msg" , "پروفایل با موفقیت تغییر یافت")
-                user.username = username
-                user.email = email
-                await user.save()
-                return renderEditProfilePage(req , res , user)
-                       
-            }else if(user.username !== username){
+            if(user.username === username) return renderEditProfilePage(req , res , user)
+            else if(user.username !== username){
                 const duplicatedUsername  = await User.findOne({ username })
                 if(duplicatedUsername){
                     req.flash("error" , "کاربر با این نام کاربری موجود است")
@@ -371,12 +365,10 @@ module.exports.handleEditProfile = async(req , res) => {
                 }
                 req.flash("success_msg" , "پروفایل با موفقیت تغییر یافت")
                 user.username = username
-                user.email = email
                 await user.save()
                 return renderEditProfilePage(req , res , user)
-                
             }
-        }else{
+        }else if(user.email !== email){
             const duplicatedEmail = await User.findOne({ email })
             if(duplicatedEmail){
                 req.flash("error" , "کاربر با این ایمیل موجود است")
@@ -385,7 +377,6 @@ module.exports.handleEditProfile = async(req , res) => {
             if(user.username === username){
                 req.flash("success_msg" , "پروفایل با موفقیت تغییر یافت")
                 user.email = email
-                user.username = username
                 await user.save()
                 return renderEditProfilePage(req , res , user)
                 
@@ -400,6 +391,7 @@ module.exports.handleEditProfile = async(req , res) => {
                 return renderEditProfilePage(req , res , user)
             }
                 req.flash("success_msg" , "پروفایل با موفقیت تغییر یافت")
+                user.email = email
                 user.username = username
                 await user.save()
                 return renderEditProfilePage(req , res , user)

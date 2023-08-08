@@ -10,18 +10,75 @@ let CAPTCHA_NUM
 
 module.exports.registerPage = (req , res) => {
     res.render("./register.ejs" , {
+        pageTitle : "تایید ایمیل",
+        path : "/users/register",
+        message : req.flash("success_msg"),
+        error : req.flash("error")
+    })
+}
+
+module.exports.handleRegister = async(req , res) => {
+    try {
+        let token = JWT.sign({ email : req.body.email } , process.env.JWT_SECRET , { expiresIn : "1h" })
+        
+        //لینک زیر باید به ایمیل کاربر ارسال شود
+        let registerLink = `http://localhost:5000/users/register/${token}`
+        console.log(`لینک ثبت نام
+        اگر در حال حاضر در وبلاگ حساب کاربری دارید ، این پیام را نادیده بگیرید
+        لینک ثبت نام : ${registerLink}`);
+        
+        req.flash("success_msg" , "لینک ثبت نام به ایمیل شما ارسال شد")
+        return res.render("./register.ejs" , {
+            pageTitle : "تایید ایمیل",
+            path : "/users/register",
+            message : req.flash("success_msg"),
+            error : req.flash("error")
+        }) 
+    } catch (err) {
+        console.log(err);
+        return res.redirect("/500")
+    }
+}
+
+module.exports.getVerifiedRegisterPage = async(req , res) => {
+    const token = req.params.token
+    let decodedToken;
+    try {
+        decodedToken = JWT.verify(token , process.env.JWT_SECRET)
+        if(!decodedToken) return res.redirect("/404")
+    } catch (error) {
+        console.log(error);
+        return res.redirect("/500")
+    }
+    return res.render("./verifiedRegister.ejs" , {
         pageTitle : "ثبت نام کاربر جدید",
-        path : "/users/register"
+        path : `/users/register/${token}`,
+        email : decodedToken.email,
+        token,
+        message : req.flash("success_msg"),
+        error : req.flash("error")
     })
 }
 
 module.exports.createUser = async(req , res) => {
     const errors = []
+    
+    const token = req.params.token
+    let decodedToken;
     try {
+        decodedToken = JWT.verify(token , process.env.JWT_SECRET)
+        if(!decodedToken)  return res.redirect("/404")
+    } catch (err) {
+        console.log(err);
+        return res.redirect("/500")
+    }
+
+    try {
+    
         //object destructuring : picks up username , email , password , confirmPassword from req.body object
-        const { email , password  , confirmPassword } = req.body
+        const { email , password , confirmPassword } = req.body
         let { username } = req.body
-        username = username.replace(/\s+/g, '-').toLowerCase() //replacing space with dash
+        username = username.replace(/\s+/g, '-').toLowerCase() //replace space with dash
 
         //finds the first thing related - finds user by email or username
         const duplicatedEmail = await User.findOne({ email : email })
@@ -29,46 +86,67 @@ module.exports.createUser = async(req , res) => {
         
         if(duplicatedUsername){
             errors.push({ message : "نام کاربری قبلا ثبت شده است" })
-            return res.render("./register.ejs" , {
+            return res.render("./verifiedRegister.ejs" , {
                 pageTitle : "ثبت نام کاربر جدید",
-                path : "/users/register",
+                path : `/users/register/${token}`,
+                token,
+                email : decodedToken.email,
                 errors : errors            
             })
         }
 
         if(duplicatedEmail){
             errors.push({ message : "ایمیل قبلا ثبت شده است" })
-            return res.render("./register.ejs" , {
+            return res.render("./verifiedRegister.ejs" , {
                 pageTitle : "ثبت نام کاربر جدید",
-                path : "/users/register",
+                path : `/users/register/${token}`,
+                token,
+                email : decodedToken.email,
                 errors : errors            
             })
         }
 
         if(username.length < 5 || username.length > 255){
             errors.push({ message : "طول نام کاربری باید حداقل 5 کاراکتر و حداکثر 255 کاراکتر باشد" })
-            return res.render("./register.ejs" , {
+            return res.render("./verifiedRegister.ejs" , {
                 pageTitle : "ثبت نام کاربر جدید",
-                path : "/users/register",
+                path : `/users/register/${token}`,
+                token,
+                email : decodedToken.email,
                 errors : errors            
             })
         }
 
         if(password.length < 6 || password.length > 255){
             errors.push({ message : "طول پسوورد باید حداقل 6 کاراکتر و حداکثر 255 کاراکتر باشد" })
-            return res.render("./register.ejs" , {
+            return res.render("./verifiedRegister.ejs" , {
                 pageTitle : "ثبت نام کاربر جدید",
-                path : "/users/register",
+                path : `/users/register/${token}`,
+                token,
+                email : decodedToken.email,
                 errors : errors            
             })
         }
 
         if(password !== confirmPassword){
             errors.push({ message : "پسوورد و تکرار پسوورد باید برابر باشند" })
-            return res.render("./register.ejs" , {
+            return res.render("./verifiedRegister.ejs" , {
                 pageTitle : "ثبت نام کاربر جدید",
-                path : "/users/register",
+                path : `/users/register/${token}`,
+                token,
+                email : decodedToken.email,
                 errors : errors            
+            })
+        }
+
+        if(email !== decodedToken.email){
+            errors.push({ message : "ایمیل نامعتبر" })
+            return res.render("./verifiedRegister.ejs" , {
+                pageTitle : "ثبت نام کاربر جدید",
+                path : `/users/register/${token}`,
+                token , 
+                email : decodedToken.email,
+                errors : errors
             })
         }
 
@@ -81,9 +159,11 @@ module.exports.createUser = async(req , res) => {
         console.log("Error : "  , err);
         if(typeof err.errors["username"] !== `undefined`) errors.push({ message : err.errors["username"].message })
         if(typeof err.errors["password"] !== `undefined`) errors.push({ message : err.errors["password"].message })
-        return res.render("./register.ejs" , {
+        return res.render("./verifiedRegister.ejs" , {
             pageTitle : "ثبت نام کاربر جدید",
             path : "/users/register",
+            token,
+            email : decodedToken.email,
             errors : errors
         })        
         
