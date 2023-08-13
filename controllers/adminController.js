@@ -95,55 +95,48 @@ module.exports.createPostPage = async(req , res) => {
         pageTitle : "ساخت پست جدید",
         path : "/dashboard/create-post",
         layout : "./layouts/dashLayout.ejs",
-        username : user.username
+        username : user.username,
+    })
+}
+
+function renderCreatePost(res , user , errors){
+    res.render("./private/createPost.ejs" , {
+        pageTitle : "ساخت پست جدید",
+        path : "/dashboard/create-post",
+        layout : "./layouts/dashLayout.ejs",
+        username : user.username,
+        errors : errors
     })
 }
 
 module.exports.handleCreatePost = async(req , res) => {
-    const user = await User.findOne({ id : req.user._id })
     const errors = []
+    const user = await User.findOne({ _id : req.user._id })    
     let thumbnail = req.files ? req.files.thumbnail : {}
     let fileName = `${await nanoid()}_${thumbnail.name}`
     fileName = fileName.replace(/\s+/g, '-').toLowerCase() //replacing space with dash
     const uploadPath = `${appRoot}/public/uploads/thumbnails/${fileName}`
-    console.log(thumbnail);
     try {
         req.body = { ...req.body , thumbnail }
         if(typeof thumbnail.name == `undefined`){
-            errors.push({ message : "قرار دادن تصویر برای پست الزامی است" })
-            return res.render("./private/createPost.ejs" , {
-                pageTitle : "ساخت پست جدید",
-                path : "/dashboard/create-post",
-                layout : "./layouts/dashLayout.ejs",
-                errors : errors 
-            })
+            errors.push({ message :  "قرار دادن تصویر برای پست الزامی است"}) 
+            return renderCreatePost(res , user , errors)
         }
-        if(thumbnail.mimetype == "image/jpeg" || thumbnail.mimetype == "image/png"){
-            if(thumbnail.size > 8000000){
-                errors.push({ message : "حداکثر حجم تصویر : 8 مگابایت" })
-                return res.render("./private/createPost.ejs" , {
-                    pageTitle : "ساخت پست جدید",
-                    path : "/dashboard/create-post",
-                    layout : "./layouts/dashLayout.ejs",
-                    errors : errors
-                })
-            }
-            await sharp(thumbnail.data).toFile(uploadPath , err => console.log(err))
+        if(thumbnail.size > 8000000){
+            errors.push({ message : "حداکثر حجم : 8 مگابایت" })
+            return renderCreatePost(res , user , errors)
+        }
+        if(thumbnail.mimetype != "image/jpeg" && thumbnail.mimetype != "image/png"){   
+            errors.push({ message : "فرمت فقط JPG یا PNG" })
+            return renderCreatePost(res , user , errors)
+        }
 
-            //Puts id of user into the post in order to access the post from the user  
-            await Post.create({ ...req.body , user : req.user._id  ,thumbnail : fileName })
+        await sharp(thumbnail.data).toFile(uploadPath , err => console.log(err))
 
-            return res.redirect("/dashboard")
-        }
-        else{
-            errors.push({ message : "فقط تصویر با فرمت JPEG یا PNG وارد شود" })
-            return res.render("./private/createPost.ejs" , {
-                pageTitle : "ساخت پست جدید",
-                path : "/dashboard/create-post",
-                layout : "./layouts/dashLayout.ejs",
-                errors : errors
-            })
-        }
+        //Puts id of user into the post in order to access the post from the user  
+        await Post.create({ ...req.body , user : req.user._id  ,thumbnail : fileName })
+
+        return res.redirect("/dashboard")
         
     } catch (err) {
         if(typeof err.errors["title"] != `undefined`) errors.push({ message : err.errors["title"].message })
@@ -153,51 +146,62 @@ module.exports.handleCreatePost = async(req , res) => {
             path : "/dashboard/create-post",
             layout : "./layouts/dashLayout.ejs",
             errors : errors,
-            username : user.username            
+            username : user.username
         })
     }
 }
 
+function renderEditPostPage(res , post , user , errors){
+    res.render("./private/editPost.ejs" , {
+        pageTitle : "ویرایش پست",
+        path : `/dashboard/edit-post/${post._id}`,
+        layout : "./layouts/dashLayout.ejs",
+        post : post,
+        username : user.username,
+        errors : errors
+    })
+}
+
 module.exports.editPostPage = async(req , res) => { 
     const user = await User.findOne({ _id : req.user._id })
+    const errors = []
     try {
 
         //finds post by id 
         const post = await Post.findOne({ _id : req.params.id })
         if(!post) return res.redirect("/404")
         if(post.user.toString() != req.user._id) return res.redirect("/dashboard")
-        else{
-            return res.render("./private/editPost.ejs" , {
-                pageTitle : "ویرایش پست",
-                path : "/dashboard/edit-post",
-                layout : "./layouts/dashLayout.ejs",
-                post : post,
-                username : user.username
-            })
-        }
+        else return renderEditPostPage(res , post , user , errors)
+        
     } catch (err) {
         console.log(err);
     }
 }
 
 module.exports.handleEditPost = async(req , res) => {
-    const user = await User.findOne({ id : req.user._id })
+    const user = await User.findOne({ _id : req.user._id })
     const errors = []
     let thumbnail = req.files ? req.files.thumbnail : {}
     let fileName = `${await nanoid()}_${thumbnail.name}`
     fileName = fileName.replace(/\s+/g, '-').toLowerCase() //replacing space with dash
     const uploadPath = `${appRoot}/public/uploads/thumbnails/${fileName}`
     
-    //finds the first thing related - finds post by id 
+    //finds post by id 
     const post = await Post.findOne({ _id : req.params.id })
-
+    console.log(post);
+    
     try {
         if(!post) return res.redirect("/404")
 
-        //post.user and req.user are populated by passportjs
+        //post.user(id of user in the post) === id of logged-in user
         if(post.user.toString() != req.user._id) return res.redirect("/dashboard")
         else{
             if(thumbnail.name){
+                if(thumbnail.mimetype != "image/jpeg" && thumbnail.mimetype != "image/png"){
+                    errors.push({ message : "فرمت فقط PNG  یا JPG" })
+                    return renderEditPostPage(res , post , user , errors)
+                }
+                
                 //Deletes previous thumbnail
                 //Adds new one
                 fs.unlink(`${appRoot}/public/uploads/thumbnails/${post.thumbnail}` , async err => {
@@ -206,18 +210,11 @@ module.exports.handleEditPost = async(req , res) => {
                 })
             }
         }
-        if(typeof thumbnail.name == `undefined` && typeof post.thumbnail == `undefined`){
-            errors.push({ message : "قرار دادن تصویر برای پست الزامی است" })
-            return res.render("./private/editPost.ejs" , {
-                pageTitle : "ویرایش پست",
-                path : "/dashboard/edit-post",
-                layout : "./layouts/dashLayout.ejs",
-                post : post,
-                errors : errors,
-                username : user.username
-            })
-        }
 
+        if(typeof thumbnail.name == `undefined` && typeof post.thumbnail == `undefined`){
+            errors.push({ message : "قرار دادن تصویر برای پست الزامی است"})
+            return renderEditPostPage(res , post , user , errors)
+        }    
         //if thumbnail.name exists (user wants to change thumbnail) fileName will be replaced
         post.thumbnail = thumbnail.name ? fileName : post.thumbnail
 
@@ -228,7 +225,8 @@ module.exports.handleEditPost = async(req , res) => {
         post.status = status
 
         await post.save()
-        return res.redirect("/dashboard")
+        return res.redirect("/dashboard")    
+    
     } catch (err) {
         console.log(err);
         if(typeof err.errors["title"] != `undefined`) errors.push({ message : err.errors["title"].message })
@@ -318,15 +316,18 @@ function renderEditProfilePage(req , res , user){
         error : req.flash("error"),
         message : req.flash("success_msg"),
         email : user.email,
-        password : user.password
+        password : user.password,
+        profilePhoto : user.profilePhoto
     })
 }
 
 module.exports.editProfilePage = async(req , res) => {
     try {
-        //finds user by id
+        //finds logged-in user by id
         const user = await User.findOne({ _id : req.user._id })
-        
+
+        if(req.params.username !== user.username) return res.redirect("/404")
+
         if(!user) return res.redirect("/404")
         
         res.render("./private/editProfile.ejs" , {
@@ -337,7 +338,8 @@ module.exports.editProfilePage = async(req , res) => {
             error : req.flash("error"),
             message : req.flash("success_msg"),
             email : user.email,
-            password : user.password
+            password : user.password,
+            profilePhoto : user.profilePhoto
         })   
 
     }catch (error) {
@@ -348,8 +350,41 @@ module.exports.editProfilePage = async(req , res) => {
 
 module.exports.handleEditProfile = async(req , res) => {
     const { username , email } = req.body
+    let profilePhoto = req.files ? req.files.profilePhoto : {}
+    let fileName = `${await nanoid()}_${profilePhoto.name}`
+    fileName = fileName.replace(/\s+/g, '-').toLowerCase() //replacing space with dash
+    const uploadPath = `${appRoot}/public/uploads/profilePhotos/${fileName}`
     try {
+        
+        //finds user by id
         const user = await User.findOne({ _id : req.user._id })
+        
+        if(profilePhoto.name){
+            if(profilePhoto.mimetype == "image/jpeg" || profilePhoto.mimetype == "image/png"){
+                if(profilePhoto.size > 8000000){
+                    errors.push({ message : "حداکثر حجم تصویر : 8 مگابایت" })
+                    return renderEditProfilePage(req , res , user)
+                }
+                if(user.profilePhoto == "") await sharp(profilePhoto.data).toFile(uploadPath , err => console.log(err))
+                else{
+
+                    //removes previous profile photo and replaces new one
+                    fs.unlink(`${appRoot}/public/uploads/profilePhotos/${user.profilePhoto}` , async err => {
+                        if(err) console.log(err);
+                        await sharp(profilePhoto.data).toFile(uploadPath , err => console.log(err))
+                    })
+                }          
+                user.profilePhoto = fileName
+                await user.save()
+            }
+            else{
+                req.flash("error" , "فقط فرمت JPG یا PNG پذیرفته می‌شود")
+                return renderEditProfilePage(req , res , user)
+            }
+        }
+
+        
+
         if(user.email === email){
             if(user.username === username) return renderEditProfilePage(req , res , user)
             else if(user.username !== username){
@@ -364,6 +399,7 @@ module.exports.handleEditProfile = async(req , res) => {
                 }
                 req.flash("success_msg" , "پروفایل با موفقیت تغییر یافت")
                 user.username = username
+                // req.params.username = username
                 await user.save()
                 return renderEditProfilePage(req , res , user)
             }
@@ -378,7 +414,10 @@ module.exports.handleEditProfile = async(req , res) => {
             const link = `http://localhost:5000/dashboard/change-email/${token}`
             
             req.flash("success_msg" , "لینک تایید به ایمیل شما ارسال شد")
+            
+            //Send email
             console.log(link);
+            
             return renderEditProfilePage(req, res , user)
         }
     } catch (error) {
@@ -394,6 +433,8 @@ module.exports.changeEmail = async(req , res) => {
     } catch (err) { console.log(err); }
 
     try {
+
+        //finds user by id
         const user = await User.findOne({ _id : req.user._id })
         if(decodedToken.username === user.username){
             user.username = decodedToken.username
@@ -414,6 +455,7 @@ module.exports.changeEmail = async(req , res) => {
             }
             user.username = decodedToken.username
             user.email = decodedToken.email
+            // req.params.username = decodedToken.username
             await user.save()
             req.flash("success_msg" , "ایمیل با موفقیت تغییر کرد")
             return res.redirect(`/dashboard/edit-profile/${user.username}`)            

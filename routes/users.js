@@ -1,6 +1,5 @@
 const { Router } = require('express');
 const router = new Router()
-const passport = require('passport');
 const userController = require('../controllers/userController.js');
 const { isAuthenticated } = require('../utils/helpers.js');
 
@@ -63,5 +62,9 @@ router.get("/message/:username" , userController.sendMessagePage)
 // @desc handle send message
 // @route POST /users/message/:username
 router.post("/message/:username" , userController.handleSendMessage)
+
+// @desc upload profile photo page
+// @route POST /users/upload-photo
+//router.post("/upload-photo" , userController.uploadPhoto)
 
 module.exports = router

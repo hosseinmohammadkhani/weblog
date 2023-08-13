@@ -5,6 +5,11 @@ const { convertToShamsi } = require('../utils/helpers.js');
 const JWT = require('jsonwebtoken');
 const captchapng = require('captchapng');
 const fetch = require('node-fetch');
+const { nanoid } = require('nanoid');
+const appRoot = require('app-root-path');
+const sharp = require('sharp');
+
+
 let CAPTCHA_NUM
 
 
@@ -40,7 +45,7 @@ module.exports.handleRegister = async(req , res) => {
     }
 }
 
-module.exports.getVerifiedRegisterPage = async(req , res) => {
+module.exports.getVerifiedRegisterPage = (req , res) => {
     const token = req.params.token
     let decodedToken;
     try {
@@ -60,6 +65,16 @@ module.exports.getVerifiedRegisterPage = async(req , res) => {
     })
 }
 
+function renderVerifiedRegisterPage(res , token , errors , decodedToken){
+    res.render("./verifiedRegister.ejs" , {
+        pageTitle : "ثبت نام کاربر جدید",
+        path : `/users/register/${token}`,
+        token : token,
+        email : decodedToken.email,
+        errors : errors            
+    })
+}
+
 module.exports.createUser = async(req , res) => {
     const errors = []
     
@@ -73,99 +88,81 @@ module.exports.createUser = async(req , res) => {
         return res.redirect("/500")
     }
 
+    let profilePhoto = req.files ? req.files.profilePhoto : {}
+    let fileName = `${await nanoid()}_${profilePhoto.name}`
+    fileName = fileName.replace(/\s+/g, '-').toLowerCase() //replacing space with dash
+    const uploadPath = `${appRoot}/public/uploads/profilePhotos/${fileName}`
     try {
-    
+
+        req.body = {...req.body , profilePhoto}
+
         //object destructuring : picks up username , email , password , confirmPassword from req.body object
         const { email , password , confirmPassword } = req.body
-        let { username } = req.body
+        let username = req.body.username
         username = username.replace(/\s+/g, '-').toLowerCase() //replace space with dash
 
-        //finds the first thing related - finds user by email or username
+        //finds user by email or username
         const duplicatedEmail = await User.findOne({ email : email })
         const duplicatedUsername = await User.findOne({ username : username })
         
         if(duplicatedUsername){
             errors.push({ message : "نام کاربری قبلا ثبت شده است" })
-            return res.render("./verifiedRegister.ejs" , {
-                pageTitle : "ثبت نام کاربر جدید",
-                path : `/users/register/${token}`,
-                token,
-                email : decodedToken.email,
-                errors : errors            
-            })
+            return renderVerifiedRegisterPage(res , token , errors , decodedToken)
         }
 
         if(duplicatedEmail){
             errors.push({ message : "ایمیل قبلا ثبت شده است" })
-            return res.render("./verifiedRegister.ejs" , {
-                pageTitle : "ثبت نام کاربر جدید",
-                path : `/users/register/${token}`,
-                token,
-                email : decodedToken.email,
-                errors : errors            
-            })
+            return renderVerifiedRegisterPage(res , token , errors , decodedToken)
         }
 
         if(username.length < 5 || username.length > 255){
             errors.push({ message : "طول نام کاربری باید حداقل 5 کاراکتر و حداکثر 255 کاراکتر باشد" })
-            return res.render("./verifiedRegister.ejs" , {
-                pageTitle : "ثبت نام کاربر جدید",
-                path : `/users/register/${token}`,
-                token,
-                email : decodedToken.email,
-                errors : errors            
-            })
+            return renderVerifiedRegisterPage(res , token , errors , decodedToken)
         }
 
         if(password.length < 6 || password.length > 255){
             errors.push({ message : "طول پسوورد باید حداقل 6 کاراکتر و حداکثر 255 کاراکتر باشد" })
-            return res.render("./verifiedRegister.ejs" , {
-                pageTitle : "ثبت نام کاربر جدید",
-                path : `/users/register/${token}`,
-                token,
-                email : decodedToken.email,
-                errors : errors            
-            })
+            return renderVerifiedRegisterPage(res , token , errors , decodedToken)
         }
 
         if(password !== confirmPassword){
             errors.push({ message : "پسوورد و تکرار پسوورد باید برابر باشند" })
-            return res.render("./verifiedRegister.ejs" , {
-                pageTitle : "ثبت نام کاربر جدید",
-                path : `/users/register/${token}`,
-                token,
-                email : decodedToken.email,
-                errors : errors            
-            })
+            return renderVerifiedRegisterPage(res , token , errors , decodedToken)
         }
 
         if(email !== decodedToken.email){
             errors.push({ message : "ایمیل نامعتبر" })
-            return res.render("./verifiedRegister.ejs" , {
-                pageTitle : "ثبت نام کاربر جدید",
-                path : `/users/register/${token}`,
-                token , 
-                email : decodedToken.email,
-                errors : errors
-            })
+            return renderVerifiedRegisterPage(res , token , errors , decodedToken)
         }
 
-        await User.create({ username : username , email : email , password : password })
+        //Profile photo
+        if(typeof profilePhoto.name == `undefined`){
+            await User.create({ username : username , email : email , password : password , profilePhoto : "" })
+            req.flash("success_msg" , "ثبت نام با موفقیت انجام شد")
+            return res.redirect("/users/login")
+        }
+            
+        
+        if(profilePhoto.mimetype == "image/jpeg" || profilePhoto.mimetype == "image/png"){
+            if(profilePhoto.size > 8000000){
+                errors.push({ message : "حداکثر حجم تصویر : 8 مگابایت" })
+                return renderVerifiedRegisterPage(res , token , errors , decodedToken)
+            }
+        }
+
+        if(profilePhoto != {}) await sharp(profilePhoto.data).toFile(uploadPath , err => console.log(err))
+
+        await User.create({ username : username , email : email , password : password , profilePhoto : fileName })
         
         req.flash("success_msg" , "ثبت نام با موفقیت انجام شد")
-
         return res.redirect("/users/login")
+
+        
     } catch (err) {
         console.log("Error : "  , err);
         if(typeof err.errors["username"] !== `undefined`) errors.push({ message : err.errors["username"].message })
         if(typeof err.errors["password"] !== `undefined`) errors.push({ message : err.errors["password"].message })
-        return res.render("./verifiedRegister.ejs" , {
-            pageTitle : "ثبت نام کاربر جدید",
-            path : "/users/register",
-            token,
-            email : decodedToken.email,
-            errors : errors
-        })        
+        return renderVerifiedRegisterPage(res , token , errors , decodedToken)        
         
     }
 
@@ -286,7 +283,10 @@ module.exports.handleForgetPassword = async(req , res) => {
         let token = JWT.sign({ userId : user._id } , process.env.JWT_SECRET , {expiresIn : "1h"})
         const resetLink = `localhost:5000/users/reset-password/${token}`
         req.flash("success_msg" , "لینک ارسال شد")
+        
+        //Send email
         console.log(resetLink);
+        
         return res.render("./forgetPassword.ejs" , {
             pageTitle : "بررسی ایمیل",
             path : "/users/forget-password",
@@ -304,7 +304,6 @@ module.exports.resetPasswordPage = (req , res) => {
     let decodedToken;
     try {
         decodedToken = JWT.verify(token , process.env.JWT_SECRET)
-        console.log(decodedToken);
     } catch (err) {
         console.log(err);
         if(!decodedToken) return res.redirect("/404")
@@ -320,7 +319,6 @@ module.exports.resetPasswordPage = (req , res) => {
 
 module.exports.handleResetPassword = async(req , res) => {
     try {
-        console.log("ID : " , req.params.token);
         const { password , confirmPassword } = req.body
         if(password !== confirmPassword){
             req.flash("error" , "رمز عبور و تکرار آن باید برابر باشند")
@@ -362,13 +360,14 @@ module.exports.handleResetPassword = async(req , res) => {
 module.exports.showProfilePage = async(req , res) => {
     const username = req._parsedOriginalUrl.path.substr(15)
     
-    //finds the first thing related - finds user by username
+    //finds user by username
     const user = await User.findOne({ username : username })
     res.render("./profile.ejs" , {
         pageTitle : user.username,
         username : user.username,
         email : user.email,
         date : user.createdAt,
+        profilePhoto : user.profilePhoto,
         convertToShamsi,
     })
 }
@@ -468,3 +467,4 @@ module.exports.getMessageCaptcha = (req , res) => {
 
     res.send(imgbase64)
 }
+

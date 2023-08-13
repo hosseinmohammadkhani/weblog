@@ -146,7 +146,6 @@ module.exports.handleContactUs = async(req , res) => {
             })
         }
         if(CAPTCHA_NUM === parseInt(captcha)){
-            console.log(message);
             Message.create({ fullName : fullName , email : email , message : message })
             req.flash("success_msg" , "پیام با موفقیت ارسال شد")
             return res.render("./contact.ejs" , {
@@ -188,8 +187,8 @@ module.exports.submitComment = async(req , res) => {
     try {
         const post = await Post.findOne({ _id : req.params.postId })
         const user = await User.findOne({ _id : post.user.toString() })
-        console.log(post)
-        //All of the comments of the post in a array
+        
+        //All of the comments of the post in an array
         const comments = await Comment.find({ postId : post._id })
 
         
@@ -226,6 +225,7 @@ module.exports.deleteComment = async(req , res) => {
         //finds post by id in the comment
         const post = await Post.findOne({ _id : comment.postId.toString() })
 
+        //Only owner of post can delete comment
         if(req.user._id == post.user.toString()){
             await Comment.findByIdAndRemove(req.params.commentId)
             return res.redirect(`/post/${post._id}`)

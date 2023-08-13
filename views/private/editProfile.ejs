@@ -17,7 +17,17 @@
             <h3 class="mb-0">Edit Profile</h3>
           </div>
           <div class="card-body">
-            <form id="editProfileForm" method="post" action="/dashboard/edit-profile/<%= username %>">
+            <form id="editProfileForm" method="post" action="/dashboard/edit-profile/<%= username %>" enctype="multipart/form-data">
+              <div class="m-3" style="text-align: center;">
+                <% if(profilePhoto == ""){ %>
+                  <img src="http://localhost:5000/uploads/profilePhotos/blank.png" alt="avatar"
+                  class="rounded-circle img-fluid" style="width: 150px;">
+                <% }else{ %>
+                  <img src="http://localhost:5000/uploads/profilePhotos/<%= profilePhoto %>" alt="avatar"
+                  class="rounded-circle img-fluid" style="width: 150px;">
+                <% } %>
+              <input class="m-3" type="file" name="profilePhoto" class="form-control" id="profile-photo" accept="image/*">
+              </div>
               <div class="mb-3">
                 <label for="fullName" class="form-label">Username</label>
                 <input type="text" class="form-control" id="username" name="username" value=<%= username %>>

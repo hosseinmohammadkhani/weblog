@@ -49,7 +49,12 @@
                         <div class="comment">
                             <h5><%= comment.name %></h5>
                             <p><%= comment.comment %></p>
-                            <a href="/delete-comment/<%= comment._id %>" class="btn btn-danger">X</a>
+                            <% if(req.isAuthenticated()){ %>
+                              <% if(req.user._id == post.user.toString()){ %>
+                                <a href="/delete-comment/<%= comment._id %>" class="btn btn-danger">X</a>
+                              <% } %>
+                            <% } %>
+                            
                             <hr>
                         </div> 
                     <% }) %>

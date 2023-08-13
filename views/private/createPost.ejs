@@ -3,7 +3,6 @@
 <div class="d-flex align-items-center justify-content-center">
     <form action="/dashboard/create-post" method="POST" class="w-50" enctype="multipart/form-data">
         <%- include("../includes/validationErrors.ejs") %>
-        
         <label for="selectThumbnail">انتخاب تصویر بند انگشتی</label>
         <div class="input-group mb-3">
             <div class="custom-file">
@@ -31,39 +30,8 @@
                 <option value="private">خصوصی</option>
             </select>
         </div>
-        <!--
-        <div class="input-group mb-3" id="imageDiv">
-            <div class="input-group-prepend">
-                <button class="btn btn-sm btn-outline-secondary" type="button" id="uploadImage">
-                    بارگزاری تصویر
-                </button>
-            </div>
-            <div class="custom-file">
-                <input type="file" class="custom-file-input" id="selectImage">
-                <label id="imageStatus" class="custom-file-label" for="selectImage">
-                    تصویر موردنظر را انتخاب کنید
-                </label>
-            </div>
-        </div>
-
-        <div class="w-100 bg-light text-center">
-            <p id="imageURL" class="overflow-auto">آدرس تصویر آپلود شده : </p>
-        </div>
-
-        <input type="button" class="copyBtn" data-clipboard-target="#imageURL" value="Copy to clipboard">
-        
-        <div id="progressDiv" style="display : none;">
-            <div class="progress">
-                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="70"
-                aria-valuemin="0" aria-valuemax="100" style="width: 70%;" id="progressBar">
-                  <span class="sr-only"></span>
-                </div>
-            </div> 
-        </div>
-        -->
-
-        
-            <div class="form-group">
+                
+        <div class="form-group">
             <h5>متن اصلی پست</h5>
             <textarea name="body" class="form-control" id="body"></textarea>
         </div>

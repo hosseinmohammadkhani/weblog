@@ -6,7 +6,7 @@ const User = require('../models/User.js');
 passport.use(new Strategy({ usernameField : "email" } , async(email , password , done) => {
     try {
 
-        //finds the first thing related  - finds user by email
+        //finds user by email
         const user = await User.findOne({ email })
         
         //done(error message , user , options)

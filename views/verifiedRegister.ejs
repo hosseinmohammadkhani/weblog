@@ -12,11 +12,17 @@
     <link rel="stylesheet" href="/css/verifiedRegister.css" />
   </head>
   <body>
-    <form action="/users/register/<%= token %>" method="POST">
+    <form action="/users/register/<%= token %>" method="POST" enctype="multipart/form-data">
       <div class="login_form_container">
       <div class="login_form">
         <h2>ثبت نام کاربر جدید</h2>
         <%- include("./includes/validationErrors.ejs") %>
+
+        <div class="mb-3">
+          <label for="profile-photo" class="form-label">عکس پروفایل</label>
+          <input type="file" name="profilePhoto" class="form-control" id="profile-photo" accept="image/*">
+        </div>
+
         <div class="input_group">
           <input
             type="text"
