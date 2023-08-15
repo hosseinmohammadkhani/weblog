@@ -362,7 +362,7 @@ module.exports.handleEditProfile = async(req , res) => {
         if(profilePhoto.name){
             if(profilePhoto.mimetype == "image/jpeg" || profilePhoto.mimetype == "image/png"){
                 if(profilePhoto.size > 8000000){
-                    errors.push({ message : "حداکثر حجم تصویر : 8 مگابایت" })
+                    req.flash("error" , "حداکثر حجم : 8 مگابایت ")
                     return renderEditProfilePage(req , res , user)
                 }
                 if(user.profilePhoto == "") await sharp(profilePhoto.data).toFile(uploadPath , err => console.log(err))
@@ -382,8 +382,6 @@ module.exports.handleEditProfile = async(req , res) => {
                 return renderEditProfilePage(req , res , user)
             }
         }
-
-        
 
         if(user.email === email){
             if(user.username === username) return renderEditProfilePage(req , res , user)
@@ -455,7 +453,6 @@ module.exports.changeEmail = async(req , res) => {
             }
             user.username = decodedToken.username
             user.email = decodedToken.email
-            // req.params.username = decodedToken.username
             await user.save()
             req.flash("success_msg" , "ایمیل با موفقیت تغییر کرد")
             return res.redirect(`/dashboard/edit-profile/${user.username}`)            

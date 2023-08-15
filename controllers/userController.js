@@ -143,11 +143,14 @@ module.exports.createUser = async(req , res) => {
         }
             
         
-        if(profilePhoto.mimetype == "image/jpeg" || profilePhoto.mimetype == "image/png"){
-            if(profilePhoto.size > 8000000){
-                errors.push({ message : "حداکثر حجم تصویر : 8 مگابایت" })
-                return renderVerifiedRegisterPage(res , token , errors , decodedToken)
-            }
+        if(profilePhoto.mimetype != "image/jpeg" && profilePhoto.mimetype != "image/png"){
+            errors.push({ message : "فقط فرمت JPG یا PNG" })
+            return renderVerifiedRegisterPage(res , token , errors , decodedToken)
+        }
+
+        if(profilePhoto.size > 8000000){
+            errors.push({ message : "حداکثر حجم : 8 مگابایت" })
+            return renderVerifiedRegisterPage(res , token , errors , decodedToken)
         }
 
         if(profilePhoto != {}) await sharp(profilePhoto.data).toFile(uploadPath , err => console.log(err))
