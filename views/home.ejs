@@ -1,16 +1,18 @@
-    <html>
+    <html dir="rtl">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <body>
 <% if(posts.length > 0){ %>
     <% posts.forEach(post => { %>
-        <div class="container">
-            <div class="post">
-                <div class="post-image" >
+        <div class="container" style="border-radius: 12px;">
+            
+            <div class="post border border-primary">
+                <div class="post-image">
                     <img src="http://localhost:5000/uploads/thumbnails/<%= post.thumbnail %>" alt="Post Image" class="img-fluid">
                 </div>
                 <h2 class="post-title"><%= post.title %></h2>
                 <div class="post-meta">
-                <span class="post-date"><%= convertToShamsi(post.createdAt) %></span>
-                <span class="post-author"></span>
+                    <span class="post-date"><%= convertToShamsi(post.createdAt) %></span>
+                    <span class="post-author"></span>
                 </div>
 
                 <div class="post-content">
@@ -18,6 +20,7 @@
                     <a href="/post/<%= post._id %>" class="see-more">See More...</a>
                 </div>
             </div>
+            
         </div>
         
         </body>
@@ -29,5 +32,5 @@
     <% }) %>
     <%- include("./includes/pagination.ejs") %>
 <% }else{ %>
-    <p>هیچ پستی در پایگاه داده نیست</p>
+    <p style="text-align: right;">هیچ پستی در پایگاه داده نیست</p>
 <% } %>

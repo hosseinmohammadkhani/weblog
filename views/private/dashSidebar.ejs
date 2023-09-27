@@ -1,3 +1,4 @@
+<!-- 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,3 +56,38 @@
 
 </body>
 </html>
+-->
+<html>
+  <title><%= pageTitle %></title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/navbarStyles.css">
+  <link rel="stylesheet" href="/css/homeCss.css">
+  <link rel="stylesheet" href="/css/sidebarStyles2.css">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  
+  <body>
+    <div class="w3-sidebar w3-light-grey w3-bar-block" style="width:25%">
+      <h3 class="w3-bar-item">Menu</h3>
+      <a href="/dashboard/create-post" class="w3-bar-item w3-button">Create post</a>
+      <a href="/dashboard/edit-profile/<%= username %>" class="w3-bar-item w3-button">Edit profile</a>
+      <a href="/dashboard/messages/<%= username %>" class="w3-bar-item w3-button">Messages</a>
+      <a href="/dashboard/comments/<%= username %>" class="w3-bar-item w3-button">Comments</a>
+    </div>
+
+    <div style="margin-left: 25%;">
+      <%- body %>
+    </div>
+
+  </body>
+
+</html>
+
+
+
+
+
+
+
+
+

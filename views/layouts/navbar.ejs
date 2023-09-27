@@ -1,5 +1,6 @@
+<!--
 <!DOCTYPE html>
-<html lang="en" dir="rtl">
+<html dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,18 +11,18 @@
   <link rel="stylesheet" href="/css/homeCss.css">
   <title><%= pageTitle %></title>
 </head>
-<body class="rtl">
+<body>
 
-  <nav class="navbar navbar-expand-lg navbar-light bg-light rtl">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
     
-    <button class="navbar-toggler rtl" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse rtl" id="navbarSupportedContent">
-      <ul class="navbar-nav mr-auto rtl">
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
         <li class="nav-item rtl">
-          <a style="text-align: right;" class="rtl nav-link <%= path === "/" ? "active"  : "" %>" href="/">صفحه اصلی</a>
+          <a style="text-align: right;" class="nav-link <%= path === "/" ? "active"  : "" %>" href="/">صفحه اصلی</a>
         </li>
         <li class="nav-item rtl">
           <a style="text-align: right;" class="nav-link" href="#">درباره ما</a>
@@ -47,18 +48,60 @@
           </li>
         <% } %>
       </ul>
-      <% if(path !== "/contact-us"){ %>
-        <form class="form-inline my-2 my-lg-0" action="/search" method="POST">
-          <input class="form-control mr-sm-2" name="search" type="search" placeholder="جستجو میان پست ها" aria-label="Search">
-          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">جستجو</button>
-        </form>
-      <% } %>
     </div>
   </nav>
 
-  <%- body %>
+  
 
   <script src="/js/homejs.js"></script>
 
 </body>
 </html>
+-->
+<html>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/css/navbarStyles.css">
+  <link rel="stylesheet" href="/css/homeCss.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <title><%= pageTitle %></title>
+  <script>
+    function myFunction() {
+    var x = document.getElementById("myTopnav");
+    if (x.className === "topnav") {
+      x.className += " responsive";
+    } else {
+      x.className = "topnav";
+    }
+  }
+  </script>
+
+  <body>
+    <div class="topnav" id="myTopnav">
+      <a href="/" class="<%= path === "/" ? "active" : "" %>">Home</a>
+      <% if(req.isAuthenticated()){ %>
+        <a href="/dashboard" class="<%= path === "/dashboard" ? "active"  : "" %>">Dashboard</a>
+      <% }else{ %>
+        <a href="/users/login" class="<%= path === "/users/login" ? "active"  : "" %>">Login</a>
+      <% } %>
+      <a href="/contact-us" class="<%= path === "/contact-us" ? "active" : "" %>">Contact Us</a>
+      <% if(req.isAuthenticated()){ %>
+        <a href="/users/logout">Logout</a>
+      <% } %>
+      <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <%- body %>
+  </body>
+
+</html>
+
+
+
+
+
+
+
+
+
